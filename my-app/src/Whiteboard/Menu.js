@@ -95,18 +95,30 @@ const ColorPicker = () => {
 const Menu = () => {
 
   const dispatch = useDispatch();
-  
+
   return (
     <div className="menu_container">
-      <IconButton src={rectangleIcon} type={toolTypes.RECTANGLE} />
-      <IconButton src={ellipseIcon} type={toolTypes.ELLIPSE} />
-      <IconButton src={lineIcon} type={toolTypes.LINE} />
-      <IconButton src={rubberIcon} isRubber />
-      <IconButton src={pencilIcon} type={toolTypes.PENCIL} />
-      <IconButton src={textIcon} type={toolTypes.TEXT} />
-      <IconButton src={selectionIcon} type={toolTypes.SELECTION} />
-      <IconButton src={eraserIcon} type={toolTypes.ERASER} />
+      {/* shapes */}
+      <div className="toolGroup">
+         <IconButton src={rectangleIcon} type={toolTypes.RECTANGLE} />
+         <IconButton src={ellipseIcon} type={toolTypes.ELLIPSE} />
+         <IconButton src={lineIcon} type={toolTypes.LINE} />
+      </div>
 
+      <div className="toolGroup"> 
+        <IconButton src={pencilIcon} type={toolTypes.PENCIL} />
+        <IconButton src={textIcon} type={toolTypes.TEXT} />
+      </div>
+     
+     
+      <div className="toolGroup">
+          <IconButton src={selectionIcon} type={toolTypes.SELECTION} />
+          <IconButton src={eraserIcon} type={toolTypes.ERASER} />
+      </div>
+
+      {/* canvas management */}
+      <div className="toolGroup">
+        <IconButton src={rubberIcon} isRubber />
       <button
       onClick={() => dispatch(undo())}
       className="menu_button"
@@ -122,7 +134,13 @@ const Menu = () => {
     >
       <img width="80%" height="80%" src={redoIcon} alt="Redo" />
     </button>
-      <ColorPicker />
+      </div>
+
+      <div className="toolGroup">
+        <ColorPicker />
+      </div>
+      
+      
     </div>
   );
 };
