@@ -35,6 +35,9 @@ const Whiteboard = () => {
   const [action, setAction] = useState(null);
   const [selectedElement, setSelectedElement] = useState(null);
 
+  // const [liveElements, setLiveElements] = useState(elements);
+
+
   const dispatch = useDispatch();
 
   useLayoutEffect(() => {
@@ -49,6 +52,10 @@ const Whiteboard = () => {
       drawElement({ roughCanvas, context: ctx, element });
     });
   }, [elements]);
+//     liveElements.forEach((element) => {
+//     drawElement({ roughCanvas, context: ctx, element });
+//   });
+// }, [liveElements]);
 
   const handleMouseDown = (event) => {
     const { clientX, clientY } = event;
@@ -225,6 +232,21 @@ const Whiteboard = () => {
 
       }
     }
+
+//     if (action === actions.DRAWING) {
+//   const index = liveElements.findIndex((el) => el.id === selectedElement.id);
+
+//   if (index !== -1) {
+//     const updated = [...liveElements];
+//     updated[index] = {
+//       ...updated[index],
+//       x2: clientX,
+//       y2: clientY,
+//     };
+//     setLiveElements(updated);
+//   }
+// }
+
 
     if (toolType === toolTypes.SELECTION) {
       const element = getElementAtPosition(clientX, clientY, elements);

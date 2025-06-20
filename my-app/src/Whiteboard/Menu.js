@@ -1,4 +1,5 @@
 import React from "react";
+import jsPDF from "jspdf";
 import rectangleIcon from "../resources/icons/rectangle.svg";
 import lineIcon from "../resources/icons/line.svg";
 import rubberIcon from "../resources/icons/clear_canvas.png";
@@ -9,6 +10,8 @@ import eraserIcon from "../resources/icons/eraser.svg"
 import ellipseIcon from "../resources/icons/ellipse.svg";
 import undoIcon from "../resources/icons/undo.png";  
 import redoIcon from "../resources/icons/redo.png";
+import exportIcon from "../resources/icons/export.png";
+import pdfIcon from "../resources/icons/pdf.png"; 
 
 import { toolTypes } from "../constants";
 import { setColor, updateElement } from "./whiteboardSlice";
@@ -17,6 +20,31 @@ import { setElements, setToolType } from "./whiteboardSlice";
 import { emitClearWhiteboard } from "../socketConn/socketConn";
 import { undo, redo } from "./whiteboardSlice";
 
+const handleExportImage = () => {
+  const canvas = document.getElementById("canvas");
+  if (!canvas) return;
+
+  const link = document.createElement("a");
+  link.download = "whiteboard-export.png";
+  link.href = canvas.toDataURL("image/png");
+  link.click();
+};
+
+const handleExportPDF = () => {
+  const canvas = document.getElementById("canvas");
+  if (!canvas) return;
+
+  const imageData = canvas.toDataURL("image/png");
+
+  const pdf = new jsPDF({
+    orientation: "landscape",
+    unit: "px",
+    format: [canvas.width, canvas.height],
+  });
+
+  pdf.addImage(imageData, "PNG", 0, 0, canvas.width, canvas.height);
+  pdf.save("whiteboard-export.pdf");
+};
 
 
 const IconButton = ({ src, type, isRubber }) => {
@@ -108,9 +136,10 @@ const Menu = () => {
       <div className="toolGroup"> 
         <IconButton src={pencilIcon} type={toolTypes.PENCIL} />
         <IconButton src={textIcon} type={toolTypes.TEXT} />
+        <ColorPicker />
       </div>
      
-     
+
       <div className="toolGroup">
           <IconButton src={selectionIcon} type={toolTypes.SELECTION} />
           <IconButton src={eraserIcon} type={toolTypes.ERASER} />
@@ -134,10 +163,28 @@ const Menu = () => {
     >
       <img width="80%" height="80%" src={redoIcon} alt="Redo" />
     </button>
+
+
       </div>
+      
 
       <div className="toolGroup">
-        <ColorPicker />
+        <button
+        onClick={() => handleExportImage()}
+        className="menu_button"
+        title="Export Canvas"
+      >
+        <img width="80%" height="80%" src={exportIcon} alt="Export" />
+      </button>
+        <button
+          onClick={handleExportPDF}
+          className="menu_button"
+          title="Export as PDF"
+        >
+          <img width="80%" height="80%" src={pdfIcon} alt="Export PDF" />
+        </button>
+        
+
       </div>
       
       
