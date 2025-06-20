@@ -1,4 +1,4 @@
-import React, { useRef, useLayoutEffect, useState } from "react";
+import React, { useRef, useLayoutEffect, useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import Menu from "./Menu";
 import rough from "roughjs/bundled/rough.esm";
@@ -18,13 +18,31 @@ import { v4 as uuid } from "uuid";
 // import { updateElement as updateElementInStore } from "./whiteboardSlice";
 import { updateElement as updateElementInStore, setElements, setSelectedElementId} from "./whiteboardSlice";
 import { emitElementUpdate } from "../socketConn/socketConn";
-
 import { emitCursorPosition } from "../socketConn/socketConn";
+// import { getSocketInstance as socket } from "../socketConn/socketConn";
+import { getSocketInstance } from "../socketConn/socketConn";
+
+import { useParams } from "react-router-dom";
+
+const socket=getSocketInstance;
 
 let emitCursor = true;
 let lastCursorPosition;
 
 const Whiteboard = () => {
+  const { roomId } = useParams();
+  
+  useEffect(() => {
+  if (roomId) {
+    const socket = getSocketInstance();
+    if (socket) {
+      socket.emit("join-room", roomId);
+    }
+    console.log(`Joined room: ${roomId}`);
+  }
+}, [roomId]);
+
+
   const canvasRef = useRef();
   const textAreaRef = useRef();
 
@@ -361,6 +379,7 @@ const Whiteboard = () => {
 
   return (
     <>
+      {console.log("✅ Menu component is being rendered")}
       <Menu />
       {action === actions.WRITING ? (
         <textarea

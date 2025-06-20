@@ -8,9 +8,10 @@ const server = http.createServer(app);
 
 app.use(cors());
 
-let elements = [];
+// let elements = [];
+const roomElements = {};
 
-const io = new Server(server, {
+const io = require("socket.io")(server, {
   cors: {
     origin: "*",
     methods: ["GET", "POST"],
@@ -18,29 +19,44 @@ const io = new Server(server, {
 });
 
 io.on("connection", (socket) => {
-  console.log("user connected");
-  io.to(socket.id).emit("whiteboard-state", elements);
+  console.log("user connected:", socket.id);
+  // io.to(socket.id).emit("whiteboard-state", elements);
+  socket.on("join-room", (roomId) => {
+    socket.join(roomId);
+    console.log(`Socket ${socket.id} joined room ${roomId}`);
 
-  socket.on("element-update", (elementData) => {
-    updateElementInElements(elementData);
+    // Send existing elements for the room
+    if (!roomElements[roomId]) {
+      roomElements[roomId] = [];
+    }
 
-    socket.broadcast.emit("element-update", elementData);
+    io.to(socket.id).emit("whiteboard-state", roomElements[roomId]);
   });
 
-  socket.on("whiteboard-clear", () => {
-    elements = [];
+  socket.on("element-update", ({roomId, elementData}) => {
+    // updateElementInElements(elementData);
+    const elements = roomElements[roomId];
+    if (!elements) return;
 
-    socket.broadcast.emit("whiteboard-clear");
+    updateElementInElements(elements, elementData);
+    socket.to(roomId).emit("remote-element-update", elementData);
   });
 
-  socket.on("cursor-position", (cursorData) => {
-    socket.broadcast.emit("cursor-position", {
+  socket.on("whiteboard-clear", (roomId) => {
+    roomElements[roomId] = [];
+
+    socket.to(roomId).emit("remote-whiteboard-clear");
+  });
+
+  socket.on("cursor-position", (roomId, cursorData) => {
+    socket.to(roomId).emit("remote-cursor-position", {
       ...cursorData,
       userId: socket.id,
     });
   });
 
   socket.on("disconnect", () => {
+    console.log("User disconnected:", socket.id);
     socket.broadcast.emit("user-disconnected", socket.id);
   });
 });
@@ -55,7 +71,7 @@ server.listen(PORT, () => {
   console.log("server is running on port", PORT);
 });
 
-const updateElementInElements = (elementData) => {
+const updateElementInElements = (elements, elementData) => {
   const index = elements.findIndex((element) => element.id === elementData.id);
 
   if (index === -1) return elements.push(elementData);

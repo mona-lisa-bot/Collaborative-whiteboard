@@ -8,6 +8,8 @@ import { setElements, updateElement } from "../Whiteboard/whiteboardSlice";
 
 let socket;
 
+
+
 export const connectWithSocketServer = () => {
   socket = io("http://localhost:3003");
 
@@ -19,15 +21,15 @@ export const connectWithSocketServer = () => {
     store.dispatch(setElements(elements));
   });
 
-  socket.on("element-update", (elementData) => {
+  socket.on("remote-element-update", (elementData) => {
     store.dispatch(updateElement(elementData));
   });
 
-  socket.on("whiteboard-clear", () => {
+  socket.on("remote-whiteboard-clear", () => {
     store.dispatch(setElements([]));
   });
 
-  socket.on("cursor-position", (cursorData) => {
+  socket.on("remote-cursor-position", (cursorData) => {
     store.dispatch(updateCursorPosition(cursorData));
   });
 
@@ -36,14 +38,16 @@ export const connectWithSocketServer = () => {
   });
 };
 
-export const emitElementUpdate = (elementData) => {
-  socket.emit("element-update", elementData);
+export const emitElementUpdate = (elementData, roomId) => {
+  socket.emit("element-update", {roomId, elementData});
 };
 
-export const emitClearWhiteboard = () => {
-  socket.emit("whiteboard-clear");
+export const emitClearWhiteboard = (roomId) => {
+  socket.emit("whiteboard-clear", roomId);
 };
 
-export const emitCursorPosition = (cursorData) => {
-  socket.emit("cursor-position", cursorData);
+export const emitCursorPosition = (cursorData, roomId) => {
+  socket.emit("cursor-position", {roomId, cursorData});
 };
+
+export const getSocketInstance = () =>socket;
