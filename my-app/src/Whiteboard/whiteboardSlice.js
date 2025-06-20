@@ -4,8 +4,12 @@ import { createElement } from "./utils/createElement"; // adjust path if needed
 const initialState = {
   tool: null,
   elements: [],
+  history: [],
+  future: [],
   color: "#000000",
   selectedElementId: null,
+
+
 };
 
 const whiteboardSlice = createSlice({
@@ -17,8 +21,11 @@ const whiteboardSlice = createSlice({
     },
     updateElement: (state, action) => {
       const { id } = action.payload;
-
       const index = state.elements.findIndex((element) => element.id === id);
+
+      // saving the current state t history before making nay changes
+      state.history.push([...state.elements]);
+      state.future = [];
 
       if (index === -1) {
         state.elements.push(action.payload);
@@ -30,7 +37,33 @@ const whiteboardSlice = createSlice({
       }
     },
 
-    
+    addElement: (state, action) => {
+      state.history.push([...state.elements]);
+      state.elements.push(action.payload);
+      state.future = [];
+    },
+
+    undo: (state) => {
+      if (state.history.length > 0) {
+        const previous = state.history.pop();
+        state.future.push([...state.elements]);
+        state.elements = previous;
+      }
+    },
+
+    redo: (state) => {
+      if (state.future.length > 0) {
+        const next = state.future.pop();
+        state.history.push([...state.elements]);
+        state.elements = next;
+      }
+    },
+
+    clearCanvas: (state) => {
+      state.history.push([...state.elements]);
+      state.elements = [];
+      state.future = [];
+    },
 
     setElements: (state, action) => {
       state.elements = action.payload;
@@ -44,7 +77,10 @@ const whiteboardSlice = createSlice({
   },
 });
 
-export const { setToolType, updateElement, setElements, setColor,  setSelectedElementId } =
+export const { setToolType, updateElement, addElement,
+  undo,
+  redo,
+  clearCanvas,setElements, setColor,  setSelectedElementId } =
   whiteboardSlice.actions;
 
 export default whiteboardSlice.reducer;

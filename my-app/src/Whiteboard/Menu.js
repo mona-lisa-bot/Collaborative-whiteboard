@@ -7,12 +7,17 @@ import textIcon from "../resources/icons/text.svg";
 import selectionIcon from "../resources/icons/selection.svg";
 import eraserIcon from "../resources/icons/eraser.svg"
 import ellipseIcon from "../resources/icons/ellipse.svg";
+import undoIcon from "../resources/icons/undo.png";  
+import redoIcon from "../resources/icons/redo.png";
 
 import { toolTypes } from "../constants";
 import { setColor, updateElement } from "./whiteboardSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { setElements, setToolType } from "./whiteboardSlice";
 import { emitClearWhiteboard } from "../socketConn/socketConn";
+import { undo, redo } from "./whiteboardSlice";
+
+
 
 const IconButton = ({ src, type, isRubber }) => {
   const dispatch = useDispatch();
@@ -88,6 +93,9 @@ const ColorPicker = () => {
 
 
 const Menu = () => {
+
+  const dispatch = useDispatch();
+  
   return (
     <div className="menu_container">
       <IconButton src={rectangleIcon} type={toolTypes.RECTANGLE} />
@@ -98,6 +106,22 @@ const Menu = () => {
       <IconButton src={textIcon} type={toolTypes.TEXT} />
       <IconButton src={selectionIcon} type={toolTypes.SELECTION} />
       <IconButton src={eraserIcon} type={toolTypes.ERASER} />
+
+      <button
+      onClick={() => dispatch(undo())}
+      className="menu_button"
+      title="Undo (Ctrl+Z)"
+    >
+      <img width="80%" height="80%" src={undoIcon} alt="Undo" />
+    </button>
+
+    <button
+      onClick={() => dispatch(redo())}
+      className="menu_button"
+      title="Redo (Ctrl+Y)"
+    >
+      <img width="80%" height="80%" src={redoIcon} alt="Redo" />
+    </button>
       <ColorPicker />
     </div>
   );
