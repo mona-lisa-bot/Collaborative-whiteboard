@@ -23,7 +23,7 @@ io.on("connection", (socket) => {
   // io.to(socket.id).emit("whiteboard-state", elements);
   socket.on("join-room", (roomId) => {
     socket.join(roomId);
-    console.log(`Socket ${socket.id} joined room ${roomId}`);
+    console.log(`🟢 User joined room: ${roomId}`);
 
     // Send existing elements for the room
     if (!roomElements[roomId]) {
@@ -48,7 +48,7 @@ io.on("connection", (socket) => {
     socket.to(roomId).emit("remote-whiteboard-clear");
   });
 
-  socket.on("cursor-position", (roomId, cursorData) => {
+  socket.on("cursor-position", ({roomId, cursorData}) => {
     socket.to(roomId).emit("remote-cursor-position", {
       ...cursorData,
       userId: socket.id,
