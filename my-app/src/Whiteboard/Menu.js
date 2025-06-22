@@ -1,6 +1,7 @@
 import React from "react";
 import jsPDF from "jspdf";
 import rectangleIcon from "../resources/icons/rectangle.svg";
+import { store } from "../store/store";
 import lineIcon from "../resources/icons/line.svg";
 import rubberIcon from "../resources/icons/clear_canvas.png";
 import pencilIcon from "../resources/icons/pencil.svg";
@@ -120,7 +121,7 @@ const ColorPicker = () => {
 };
 
 
-const Menu = () => {
+const Menu = ({handleUndo, handleRedo} ) => {
 
   const dispatch = useDispatch();
 
@@ -149,15 +150,16 @@ const Menu = () => {
       <div className="toolGroup">
         <IconButton src={rubberIcon} isRubber />
       <button
-      onClick={() => dispatch(undo())}
-      className="menu_button"
-      title="Undo (Ctrl+Z)"
-    >
+          onClick={handleUndo}
+          
+          className="menu_button"
+          title="Undo (Ctrl+Z)"
+      >
       <img width="80%" height="80%" src={undoIcon} alt="Undo" />
-    </button>
+      </button>
 
-    <button
-      onClick={() => dispatch(redo())}
+    <button 
+      onClick={handleRedo}
       className="menu_button"
       title="Redo (Ctrl+Y)"
     >

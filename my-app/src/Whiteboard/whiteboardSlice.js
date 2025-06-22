@@ -46,16 +46,19 @@ const whiteboardSlice = createSlice({
     undo: (state) => {
       if (state.history.length > 0) {
         const previous = state.history.pop();
-        state.future.push([...state.elements]);
+        // state.future.unshift(state.elements);
+        state.future.unshift([...state.elements]);
         state.elements = previous;
+         state.elements = Array.isArray(previous) ? previous : [previous];
       }
     },
 
     redo: (state) => {
       if (state.future.length > 0) {
         const next = state.future.pop();
+        // state.past.push(state.elements);
         state.history.push([...state.elements]);
-        state.elements = next;
+        state.elements = Array.isArray(next) ? next : [next];
       }
     },
 
@@ -66,7 +69,9 @@ const whiteboardSlice = createSlice({
     },
 
     setElements: (state, action) => {
-      state.elements = action.payload;
+      state.history.push(...state.elements);
+      state.elements = Array.isArray(action.payload) ? action.payload : [];
+      state.future = [];
     },
     setColor: (state, action) => {
     state.color = action.payload;

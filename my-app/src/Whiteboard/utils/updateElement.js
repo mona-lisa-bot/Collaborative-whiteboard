@@ -6,7 +6,8 @@ import { setElements } from "../whiteboardSlice";
 
 export const updatePencilElementWhenMoving = (
   { index, newPoints },
-  elements
+  elements,
+  roomId
 ) => {
   const elementsCopy = [...elements];
 
@@ -20,12 +21,14 @@ export const updatePencilElementWhenMoving = (
   const updatedPencilElement = elementsCopy[index];
 
   store.dispatch(setElements(elementsCopy));
-  emitElementUpdate(updatedPencilElement);
+  emitElementUpdate(updatedPencilElement, roomId);
 };
 
 export const updateElement = (
   { id, x1, x2, y1, y2, type, index, text },
-  elements
+  elements,
+  roomId,
+  setLiveElements
 ) => {
   const elementsCopy = [...elements];
 
@@ -44,10 +47,14 @@ export const updateElement = (
       });
 
       elementsCopy[index] = updatedElement;
+      if (setLiveElements) {
+        setLiveElements(elementsCopy); // ✅ fast local update (no Redux)
+      } else {
+        store.dispatch(setElements(elementsCopy)); // ✅ final update
+      }
 
-      store.dispatch(setElements(elementsCopy));
 
-      emitElementUpdate(updatedElement);
+      emitElementUpdate(updatedElement, roomId);
       break;
     case toolTypes.PENCIL:
       elementsCopy[index] = {
@@ -63,9 +70,14 @@ export const updateElement = (
 
       const updatedPencilElement = elementsCopy[index];
 
-      store.dispatch(setElements(elementsCopy));
+      if (setLiveElements) {
+        setLiveElements(elementsCopy); // ✅ fast local update (no Redux)
+      } else {
+        store.dispatch(setElements(elementsCopy)); // ✅ final update
+      }
 
-      emitElementUpdate(updatedPencilElement);
+
+      emitElementUpdate(updatedPencilElement, roomId);
       break;
     case toolTypes.TEXT:
       const textWidth = document
@@ -90,9 +102,12 @@ export const updateElement = (
 
       const updatedTextElement = elementsCopy[index];
 
-      store.dispatch(setElements(elementsCopy));
-
-      emitElementUpdate(updatedTextElement);
+      if (setLiveElements) {
+        setLiveElements(elementsCopy); // ✅ fast local update (no Redux)
+      } else {
+        store.dispatch(setElements(elementsCopy)); // ✅ final update
+      }
+      emitElementUpdate(updatedTextElement, roomId);
       break;
     default:
       throw new Error("Something went wrong when updating element");

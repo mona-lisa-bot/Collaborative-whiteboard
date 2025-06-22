@@ -9,9 +9,10 @@ export const store = configureStore({
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
-      serializableCheck: {
-        ignoreActions: ["whiteboard/setElements"],
-        ignoredPaths: ["whiteboard.elements"],
-      },
+      serializableCheck: false,
+      //  {
+      //   ignoreActions: ["whiteboard/setElements"],
+      //   ignoredPaths: ["whiteboard.elements"],
+      // },
     }),
 });

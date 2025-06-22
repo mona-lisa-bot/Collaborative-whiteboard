@@ -15,31 +15,64 @@ import {
   updatePencilElementWhenMoving,
 } from "./utils";
 import { v4 as uuid } from "uuid";
-// import { updateElement as updateElementInStore } from "./whiteboardSlice";
 import { updateElement as updateElementInStore, setElements, setSelectedElementId} from "./whiteboardSlice";
 import { emitElementUpdate } from "../socketConn/socketConn";
 import { emitCursorPosition } from "../socketConn/socketConn";
-// import { getSocketInstance as socket } from "../socketConn/socketConn";
-import { getSocketInstance } from "../socketConn/socketConn";
+import { undo, redo } from "./whiteboardSlice";
+import { store } from "../store/store";
+
+import { connectWithSocketServer, getSocketInstance } from "../socketConn/socketConn";
 
 import { useParams } from "react-router-dom";
 
-const socket=getSocketInstance;
+// const socket=getSocketInstance;
 
 let emitCursor = true;
 let lastCursorPosition;
 
 const Whiteboard = () => {
   const { roomId } = useParams();
-  
-  useEffect(() => {
-  if (roomId) {
-    const socket = getSocketInstance();
-    if (socket) {
-      socket.emit("join-room", roomId);
-    }
-    console.log(`Joined room: ${roomId}`);
+  const [liveElements, setLiveElements] = useState([]);
+  const elements = useSelector((state) => state.whiteboard.elements);
+
+  const handleUndo = () => {
+  dispatch(undo());
+  const updated = store.getState().whiteboard.elements;
+  if (Array.isArray(updated)) {
+    setLiveElements(updated);
+  } else {
+    console.error("❌ Undo state is not an array:", updated);
+    setLiveElements([]); // fallback to empty array to avoid crash
   }
+};
+
+const handleRedo = () => {
+  dispatch(redo());
+  const updated = store.getState().whiteboard.elements;
+   if (Array.isArray(updated)) {
+    setLiveElements(updated);
+  } else {
+    console.error("❌ Redo state is not an array:", updated);
+    setLiveElements([]);
+  }
+};
+  useEffect(() => {
+    setLiveElements(elements);
+  }, [elements]);
+
+  useEffect(() => {
+    const socket = getSocketInstance();
+    const interval = setInterval(() => {
+    if (socket && socket.connected) {
+      socket.emit("join-room", roomId);
+      console.log(`✅ Joined room: ${roomId}`);
+      clearInterval(interval);
+    } else {
+      console.log("⏳ Waiting for socket to connect...");
+    }
+  }, 100);
+
+  return () => clearInterval(interval);
 }, [roomId]);
 
 
@@ -47,13 +80,13 @@ const Whiteboard = () => {
   const textAreaRef = useRef();
 
   const toolType = useSelector((state) => state.whiteboard.tool);
-  const elements = useSelector((state) => state.whiteboard.elements);
+  
   const color = useSelector((state) => state.whiteboard.color);
 
   const [action, setAction] = useState(null);
   const [selectedElement, setSelectedElement] = useState(null);
 
-  // const [liveElements, setLiveElements] = useState(elements);
+  
 
 
   const dispatch = useDispatch();
@@ -61,19 +94,33 @@ const Whiteboard = () => {
   useLayoutEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
     const roughCanvas = rough.canvas(canvas);
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      liveElements.forEach((element) => {
+        drawElement({ roughCanvas, context: ctx, element });
+      });
+    }, [liveElements]);
 
-    elements.forEach((element) => {
-      drawElement({ roughCanvas, context: ctx, element });
-    });
-  }, [elements]);
-//     liveElements.forEach((element) => {
+    console.log("undo state",  store.getState().whiteboard.elements)
+
+  
+// useEffect(() => {
+//   if (!Array.isArray(liveElements)) return;
+
+//   const canvas = canvasRef.current;
+//   if (!canvas) return;
+  
+//   const ctx = canvas.getContext("2d");
+//   if (!ctx) return;
+
+//   const roughCanvas = rough.canvas(canvas);
+//   ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+//   for (const element of liveElements) {
 //     drawElement({ roughCanvas, context: ctx, element });
-//   });
+//   }
 // }, [liveElements]);
+
 
   const handleMouseDown = (event) => {
     const { clientX, clientY } = event;
@@ -99,18 +146,19 @@ const Whiteboard = () => {
 
         setAction(actions.DRAWING);
         setSelectedElement(element);
-        dispatch(updateElementInStore(element));
-        emitElementUpdate(element);
+        setLiveElements((prev) => [...prev, element]);
+        emitElementUpdate(element, roomId);
         break;
       }
       case toolTypes.ERASER: {
   // Step 2a: Find the element under the mouse click
-      const element = getElementAtPosition(clientX, clientY, elements);
+      const element = getElementAtPosition(clientX, clientY, liveElements);
 
   // Step 2b: If there's an element, remove it from the elements list
       if (element) {
        const updatedElements = elements.filter((el) => el.id !== element.id);
-        dispatch(setElements(updatedElements));
+       setLiveElements(updatedElements);
+       dispatch(setElements(updatedElements));
       }
 
   // Step 2c: Return so it doesn't go to drawing logic
@@ -130,11 +178,11 @@ const Whiteboard = () => {
 
         setAction(actions.WRITING);
         setSelectedElement(element);
-        dispatch(updateElementInStore(element));
+        setLiveElements((prev) => [...prev, element]);
         break;
       }
       case toolTypes.SELECTION: {
-        const element = getElementAtPosition(clientX, clientY, elements);
+        const element = getElementAtPosition(clientX, clientY, liveElements);
 
         if (element) {
           dispatch(setSelectedElementId(element.id)); 
@@ -158,7 +206,7 @@ const Whiteboard = () => {
           const offsetY = clientY - element.y1;
 
           setSelectedElement({ ...element, offsetX, offsetY });
-          dispatch(setSelectedElementId(element.id));
+          // dispatch(setSelectedElementId(element.id));
 
         }
 
@@ -178,15 +226,15 @@ const Whiteboard = () => {
   };
 
   const handleMouseUp = () => {
-    const selectedElementIndex = elements.findIndex(
+    const selectedElementIndex = liveElements.findIndex(
       (el) => el.id === selectedElement?.id
     );
 
     if (selectedElementIndex !== -1) {
       if (action === actions.DRAWING || action === actions.RESIZING) {
-        if (adjustmentRequired(elements[selectedElementIndex].type)) {
+        if (adjustmentRequired(liveElements[selectedElementIndex].type)) {
           const { x1, y1, x2, y2 } = adjustElementCoordinates(
-            elements[selectedElementIndex]
+            liveElements[selectedElementIndex]
           );
 
           updateElement(
@@ -197,9 +245,11 @@ const Whiteboard = () => {
               x2,
               y1,
               y2,
-              type: elements[selectedElementIndex].type,
+              type: liveElements[selectedElementIndex].type,
             },
-            elements
+            liveElements,
+            roomId,
+            setLiveElements
           );
         }
       }
@@ -207,7 +257,7 @@ const Whiteboard = () => {
 
     setAction(null);
     setSelectedElement(null);
-    dispatch(setSelectedElementId(null));
+    dispatch(setElements(liveElements));
 
   };
 
@@ -217,57 +267,52 @@ const Whiteboard = () => {
     lastCursorPosition = { x: clientX, y: clientY };
 
     if (emitCursor) {
-      emitCursorPosition({ x: clientX, y: clientY });
+      emitCursorPosition({ x: clientX, y: clientY }, roomId);
       emitCursor = false;
 
       console.log("sending-position");
 
       setTimeout(() => {
         emitCursor = true;
-        emitCursorPosition(lastCursorPosition);
-      }, [50]);
+        emitCursorPosition(lastCursorPosition, roomId);
+      }, 50);
     }
 
-    if (action === actions.DRAWING) {
-      // find index of selected element
-      const index = elements.findIndex((el) => el.id === selectedElement.id);
+    if (action === actions.DRAWING && selectedElement?.type === toolTypes.PENCIL) {
+          const index = liveElements.findIndex((el) => el.id === selectedElement.id);
+          if (index !== -1) {
+            const updated = [...liveElements];
+            const updatedElement = {
+              ...updated[index],
+              points: [...updated[index].points, { x: clientX, y: clientY }],
+            };
+            updated[index] = updatedElement;
+            setLiveElements(updated);
+            emitElementUpdate(updatedElement, roomId);
+          }
+          return;
+           }
 
-      if (index !== -1) {
-        updateElement(
-          {
-            index,
-            id: elements[index].id,
-            x1: elements[index].x1,
-            y1: elements[index].y1,
+
+      if (action === actions.DRAWING) {
+        const index = liveElements.findIndex((el) => el.id === selectedElement.id);
+
+        if (index !== -1) {
+          const updated = [...liveElements];
+          updated[index] = {
+            ...updated[index],
             x2: clientX,
             y2: clientY,
-            type: elements[index].type,
-            color: elements[index].color,
-          },
-          elements
-        );
-        emitElementUpdate(elements[index]);
-
+          };
+          setLiveElements(updated);
+          emitElementUpdate(updated[index], roomId);
+        }
+        return;
       }
-    }
-
-//     if (action === actions.DRAWING) {
-//   const index = liveElements.findIndex((el) => el.id === selectedElement.id);
-
-//   if (index !== -1) {
-//     const updated = [...liveElements];
-//     updated[index] = {
-//       ...updated[index],
-//       x2: clientX,
-//       y2: clientY,
-//     };
-//     setLiveElements(updated);
-//   }
-// }
 
 
     if (toolType === toolTypes.SELECTION) {
-      const element = getElementAtPosition(clientX, clientY, elements);
+      const element = getElementAtPosition(clientX, clientY, liveElements);
 
       event.target.style.cursor = element
         ? getCursorForPosition(element.position)
@@ -288,7 +333,7 @@ const Whiteboard = () => {
       const index = elements.findIndex((el) => el.id === selectedElement.id);
 
       if (index !== -1) {
-        updatePencilElementWhenMoving({ index, newPoints }, elements);
+        updatePencilElementWhenMoving({ index, newPoints }, elements, roomId);
       }
 
       return;
@@ -322,7 +367,9 @@ const Whiteboard = () => {
             index,
             text,
           },
-          elements
+          liveElements,
+          roomId,
+          setLiveElements
         );
       }
     }
@@ -355,7 +402,9 @@ const Whiteboard = () => {
             id: selectedElement.id,
             index: selectedElementIndex,
           },
-          elements
+          liveElements,
+          roomId,
+          setLiveElements
         );
       }
     }
@@ -364,12 +413,14 @@ const Whiteboard = () => {
   const handleTextareaBlur = (event) => {
     const { id, x1, y1, type } = selectedElement;
 
-    const index = elements.findIndex((el) => el.id === selectedElement.id);
+    const index = liveElements.findIndex((el) => el.id === selectedElement.id);
 
     if (index !== -1) {
       updateElement(
         { id, x1, y1, type, text: event.target.value, index },
-        elements
+        liveElements,
+        roomId,
+        setLiveElements
       );
 
       setAction(null);
@@ -377,10 +428,15 @@ const Whiteboard = () => {
     }
   };
 
+  
   return (
     <>
       {console.log("✅ Menu component is being rendered")}
-      <Menu />
+      <Menu 
+          handleUndo={handleUndo}
+          handleRedo={handleRedo}
+      
+      />
       {action === actions.WRITING ? (
         <textarea
           ref={textAreaRef}
