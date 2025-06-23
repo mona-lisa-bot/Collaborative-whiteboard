@@ -35,6 +35,7 @@ A real-time collaborative whiteboard web application that allows multiple users 
 - **Canvas Rendering**: HTML5 Canvas API  
 - **State Management**: Redux + Redux Toolkit  
 - **Real-Time**: WebSockets via Socket.IO
+- **Bootstrapped With**: [Create React App](https://github.com/facebook/create-react-app)
 
 ---
 
@@ -46,7 +47,7 @@ Check with:
 ```bash
 node --version
 npm -version
-
+```
 ### 1️⃣ Clone the Repository
 
 To get started with the project on your local machine:
@@ -56,17 +57,21 @@ To get started with the project on your local machine:
 ```bash
 git clone https://github.com/mona-lisa-bot/collaborative-whiteboard.git
 cd collaborative-whiteboard
-
+```
 ### 2️⃣ Backend Setup (Node + Socket.IO)
 
 1. Navigate to the backend directory:
 ```bash
 cd server
+```
 2. Install dependencies:
 ```bash
 npm install
+```
 3. Start the backend server:
-```bash node index.js
+```bash
+node index.js
+```
 ✅ You should see:
 Server is running on port 3003
 
@@ -76,11 +81,17 @@ Server is running on port 3003
 2. Navigate to the frontend directory:
 ```bash
 cd my-app
+```
 3. Install frontend dependencies:
 ```bash
 npm install
+```
 4. Start the React app:
 ```bash
 npm start
+```
 ✅ The app will open automatically at:
 http://localhost:3000
+
+
+This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app), using the [Redux](https://redux.js.org/) and [Redux Toolkit](https://redux-toolkit.js.org/) template.
