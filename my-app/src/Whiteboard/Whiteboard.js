@@ -447,11 +447,13 @@ const handleRedo = () => {
   return (
     <>
       {console.log("✅ Menu component is being rendered")}
+      {isEditor&& (
       <Menu 
           handleUndo={handleUndo}
           handleRedo={handleRedo}
       
       />
+  )}
       {action === actions.WRITING ? (
         <textarea
           ref={textAreaRef}
