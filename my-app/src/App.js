@@ -36,15 +36,3 @@ function App() {
 
 export default App;
 
-// function App() {
-//   useEffect(() => {
-//     connectWithSocketServer();
-//   }, []);
-
-//   return (
-//     <div>
-//       <Whiteboard />
-//       <CursorOverlay />
-//     </div>
-//   );
-// }
