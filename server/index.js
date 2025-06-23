@@ -17,10 +17,22 @@ const io = require("socket.io")(server, {
     methods: ["GET", "POST"],
   },
 });
+const rooms = {};
 
 io.on("connection", (socket) => {
   console.log("user connected:", socket.id);
   // io.to(socket.id).emit("whiteboard-state", elements);
+
+  socket.on("create-room", ({ roomId, isPrivate, allowedUsers, editors }) => {
+  rooms[roomId] = {
+    isPrivate: !!isPrivate,
+    allowedUsers: allowedUsers || [],
+    editors: editors || [],
+  };
+  console.log(`✅ Room created: ${roomId}`);
+  console.log(rooms[roomId]);
+});
+
   socket.on("join-room", (roomId) => {
     socket.join(roomId);
     console.log(`🟢 User joined room: ${roomId}`);

@@ -6,18 +6,20 @@ import {
 import { store } from "../store/store";
 import { setElements, updateElement } from "../Whiteboard/whiteboardSlice";
 
-let socket;
+let socket= null;
 
 
 
 export const connectWithSocketServer = () => {
-  socket = io("https://collaborative-whiteboard-tiez.onrender.com/");
+  if (!socket) {
+    socket = io("http://localhost:3003");
+    // transports: ["websocket"],
 
-  socket.on("connect", () => {
-    console.log("connected to socket.io server");
-  });
+    socket.on("connect", () => {
+      console.log("✅ Connected to socket.io server");
+    });
 
-  socket.on("whiteboard-state", (elements) => {
+    socket.on("whiteboard-state", (elements) => {
     store.dispatch(setElements(elements));
   });
 
@@ -36,7 +38,17 @@ export const connectWithSocketServer = () => {
   socket.on("user-disconnected", (disconnectedUserId) => {
     store.dispatch(removeCursorPosition(disconnectedUserId));
   });
+  }
+
+  return socket;
 };
+  // socket = io("http://localhost:3003");
+  // socket.on("connect", () => {
+  //   console.log("connected to socket.io server");
+  // });
+
+  
+
 
 export const emitElementUpdate = (elementData, roomId) => {
   socket.emit("element-update", {roomId, elementData});

@@ -30,8 +30,11 @@ import { useParams } from "react-router-dom";
 let emitCursor = true;
 let lastCursorPosition;
 
+
+
 const Whiteboard = () => {
   const { roomId } = useParams();
+  const [socketReady, setSocketReady] = useState(false);
   const [liveElements, setLiveElements] = useState([]);
   const elements = useSelector((state) => state.whiteboard.elements);
 
@@ -60,12 +63,24 @@ const handleRedo = () => {
     setLiveElements(elements);
   }, [elements]);
 
+  
   useEffect(() => {
+  const interval = setInterval(() => {
     const socket = getSocketInstance();
-    const interval = setInterval(() => {
     if (socket && socket.connected) {
+      console.log("✅ Socket is connected");
+
+      const roomMeta = JSON.parse(localStorage.getItem("roomMeta"));
+      if (roomMeta) {
+        socket.emit("create-room", roomMeta);
+        console.log("📤 Sent create-room to backend:", roomMeta);
+        localStorage.removeItem("roomMeta");
+      }
+
       socket.emit("join-room", roomId);
       console.log(`✅ Joined room: ${roomId}`);
+
+      setSocketReady(true);
       clearInterval(interval);
     } else {
       console.log("⏳ Waiting for socket to connect...");
@@ -74,6 +89,8 @@ const handleRedo = () => {
 
   return () => clearInterval(interval);
 }, [roomId]);
+
+
 
 
   const canvasRef = useRef();
@@ -104,22 +121,7 @@ const handleRedo = () => {
     console.log("undo state",  store.getState().whiteboard.elements)
 
   
-// useEffect(() => {
-//   if (!Array.isArray(liveElements)) return;
 
-//   const canvas = canvasRef.current;
-//   if (!canvas) return;
-  
-//   const ctx = canvas.getContext("2d");
-//   if (!ctx) return;
-
-//   const roughCanvas = rough.canvas(canvas);
-//   ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-//   for (const element of liveElements) {
-//     drawElement({ roughCanvas, context: ctx, element });
-//   }
-// }, [liveElements]);
 
 
   const handleMouseDown = (event) => {
