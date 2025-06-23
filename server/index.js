@@ -33,9 +33,10 @@ io.on("connection", (socket) => {
   console.log(rooms[roomId]);
 });
 
-  socket.on("join-room", (roomId) => {
+  socket.on("join-room", ({roomId, userId, role}) => {
     socket.join(roomId);
-    console.log(`🟢 User joined room: ${roomId}`);
+    socket.data.role = role;
+    console.log(`🟢 User joined room: ${roomId} as ${role}`);
 
     // Send existing elements for the room
     if (!roomElements[roomId]) {

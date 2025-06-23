@@ -35,6 +35,9 @@ let lastCursorPosition;
 const Whiteboard = () => {
   const { roomId } = useParams();
   const [socketReady, setSocketReady] = useState(false);
+  const role = localStorage.getItem("userRole") || "viewer";
+  const isEditor = role === "editor";
+
   const [liveElements, setLiveElements] = useState([]);
   const elements = useSelector((state) => state.whiteboard.elements);
 
@@ -77,7 +80,13 @@ const handleRedo = () => {
         localStorage.removeItem("roomMeta");
       }
 
-      socket.emit("join-room", roomId);
+
+      socket.emit("join-room", {
+        roomId,
+        userId: socket.id,
+        role: localStorage.getItem("userRole") || "viewer", // default to viewer
+      });
+
       console.log(`✅ Joined room: ${roomId}`);
 
       setSocketReady(true);
@@ -125,6 +134,7 @@ const handleRedo = () => {
 
 
   const handleMouseDown = (event) => {
+    if(!isEditor) return;
     const { clientX, clientY } = event;
 
     if (selectedElement && action === actions.WRITING) {
@@ -228,6 +238,7 @@ const handleRedo = () => {
   };
 
   const handleMouseUp = () => {
+    if (!isEditor) return;
     const selectedElementIndex = liveElements.findIndex(
       (el) => el.id === selectedElement?.id
     );
@@ -264,6 +275,7 @@ const handleRedo = () => {
   };
 
   const handleMouseMove = (event) => {
+    if (!isEditor) return;
     const { clientX, clientY } = event;
 
     lastCursorPosition = { x: clientX, y: clientY };
@@ -413,6 +425,7 @@ const handleRedo = () => {
   };
 
   const handleTextareaBlur = (event) => {
+    if (!isEditor) return;
     const { id, x1, y1, type } = selectedElement;
 
     const index = liveElements.findIndex((el) => el.id === selectedElement.id);
