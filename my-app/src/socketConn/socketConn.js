@@ -12,7 +12,7 @@ let socket= null;
 
 export const connectWithSocketServer = () => {
   if (!socket) {
-    socket = io("http://localhost:3003");
+    socket = io("https://collaborative-whiteboard-tiez.onrender.com");
     // transports: ["websocket"],
 
     socket.on("connect", () => {
