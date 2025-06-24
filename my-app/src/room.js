@@ -12,12 +12,21 @@ const CreateRoom = () => {
     const roomId = uuidv4();
     const userId = prompt("Enter your user ID or name");
 
+    const editorList = editors
+      .split(",")
+      .map((u) => u.trim())
+      .filter((u) => u); // remove empty strings
+
+    if (!editorList.includes(userId)) {
+      editorList.push(userId); // ✅ Ensure creator is an editor
+    }
+
     const roomData = {
       roomId,
       owner: userId,
       isPrivate,
       allowedUsers: allowedUsers.split(",").map(u => u.trim()).filter(Boolean),
-      editors: editors.split(",").map(u => u.trim()).filter(Boolean),
+      editors: editorList,
     };
 
     localStorage.setItem("userId", userId);
