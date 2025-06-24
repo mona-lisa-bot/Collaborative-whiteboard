@@ -38,7 +38,7 @@ A real-time collaborative whiteboard web application that allows multiple users 
 - **Bootstrapped With**: [Create React App](https://github.com/facebook/create-react-app)
 
 ---
-## Creates using BoardStorm
+## Created using BoardStorm
 
  <img width="818" alt="image" src="https://github.com/user-attachments/assets/7cd16664-2bdc-4925-9daa-2e8bfdc46aa8" />
  
