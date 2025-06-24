@@ -4,9 +4,9 @@ import "./HomePage.css";
 
 const HomePage = () => {
   return (
-    <div className="homepage-wrapper">
+    <div className="homepage-wrapper">      
         <div className="homepage-card">
-            <h2 className="page-title">Welcome to the Whiteboard App</h2>
+            <h2 className="page-title">Welcome to BoardStorm</h2>
             <div className="button-group">
             <Link to="/create">
                 <button className="button-primary">Create Room</button>

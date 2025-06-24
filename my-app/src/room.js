@@ -36,7 +36,7 @@ const CreateRoom = () => {
 
     // Send room data to backend
   try {
-    const res = await fetch("http://localhost:3003/api/create-room", {
+    const res = await fetch("https://collaborative-whiteboard-tiez.onrender.com/api/create-room", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

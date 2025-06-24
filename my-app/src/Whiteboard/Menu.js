@@ -7,7 +7,7 @@ import rubberIcon from "../resources/icons/clear_canvas.png";
 import pencilIcon from "../resources/icons/pencil.svg";
 import textIcon from "../resources/icons/text.svg";
 import selectionIcon from "../resources/icons/selection.svg";
-import eraserIcon from "../resources/icons/eraser.svg"
+import eraserIcon from "../resources/icons/eraser.png"
 import ellipseIcon from "../resources/icons/ellipse.svg";
 import undoIcon from "../resources/icons/undo.png";  
 import redoIcon from "../resources/icons/redo.png";

@@ -41,6 +41,16 @@ const Whiteboard = () => {
   const [role, setRole] = useState("viewer");
   const isEditor = role === "editor";
   const elements = useSelector((state) => state.whiteboard.elements);
+  // const [copied, setCopied] = useState(false);
+  const [copied, setCopied] = useState("");
+
+
+  const handleCopy = (text) => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    });
+  };
 
   const handleUndo = () => {
   dispatch(undo());
@@ -488,6 +498,41 @@ const handleRedo = () => {
           }}
         />
       ) : null}
+
+      <div className="room-id-banner">
+
+  {/* Copy Room ID button */}
+  <button
+    className="copy-button"
+    onClick={() => {
+      navigator.clipboard.writeText(roomId);
+      setCopied("id");
+      setTimeout(() => setCopied(""), 2000);
+    }}
+    title="Copy Room ID"
+  >
+    📋
+  </button>
+
+  {/* Copy Invite Link button */}
+  <button
+    className="copy-button"
+    onClick={() => {
+      navigator.clipboard.writeText(`${window.location.origin}/room/${roomId}`);
+      setCopied("link");
+      setTimeout(() => setCopied(""), 2000);
+    }}
+    title="Copy Invite Link"
+  >
+    🔗
+  </button>
+
+  {/* Feedback */}
+  {copied === "id" && <span className="copied-text">Room ID Copied!</span>}
+  {copied === "link" && <span className="copied-text">Invite Link Copied!</span>}
+</div>
+
+
       <canvas
         onMouseDown={handleMouseDown}
         onMouseUp={handleMouseUp}
