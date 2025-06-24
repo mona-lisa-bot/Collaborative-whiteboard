@@ -8,21 +8,41 @@ const CreateRoom = () => {
   const [editors, setEditors] = useState("");
   const navigate = useNavigate();
 
-  const handleCreateRoom = () => {
+  const handleCreateRoom = async () => {
     const roomId = uuidv4();
     const userId = prompt("Enter your user ID or name");
 
     const roomData = {
       roomId,
+      owner: userId,
       isPrivate,
-      allowedUsers: allowedUsers.split(",").map(u => u.trim()),
-      editors: editors.split(",").map(u => u.trim()),
+      allowedUsers: allowedUsers.split(",").map(u => u.trim()).filter(Boolean),
+      editors: editors.split(",").map(u => u.trim()).filter(Boolean),
     };
 
     localStorage.setItem("userId", userId);
     localStorage.setItem("roomMeta", JSON.stringify(roomData));
 
-    navigate(`/room/${roomId}`);
+    // Send room data to backend
+  try {
+    const res = await fetch("http://localhost:3003/api/create-room", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(roomData),
+    });
+
+    const result = await res.json();
+    if (result.success) {
+      navigate(`/room/${roomId}`);
+    } else {
+      alert("Failed to create room: " + result.message);
+    }
+  } catch (err) {
+    console.error("Room creation error:", err);
+    alert("Error creating room.");
+  }
   };
 
   return (

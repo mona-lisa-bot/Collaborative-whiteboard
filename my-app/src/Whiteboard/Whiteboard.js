@@ -31,14 +31,15 @@ let emitCursor = true;
 let lastCursorPosition;
 
 
+ // default
 
 const Whiteboard = () => {
   const { roomId } = useParams();
   const [socketReady, setSocketReady] = useState(false);
-  const role = localStorage.getItem("userRole") || "viewer";
-  const isEditor = role === "editor";
 
   const [liveElements, setLiveElements] = useState([]);
+  const [role, setRole] = useState("viewer");
+  const isEditor = role === "editor";
   const elements = useSelector((state) => state.whiteboard.elements);
 
   const handleUndo = () => {
@@ -66,11 +67,13 @@ const handleRedo = () => {
     setLiveElements(elements);
   }, [elements]);
 
+
   
   useEffect(() => {
   const interval = setInterval(() => {
     const socket = getSocketInstance();
     if (socket && socket.connected) {
+      const userId = localStorage.getItem("userId");
       console.log("✅ Socket is connected");
 
       const roomMeta = JSON.parse(localStorage.getItem("roomMeta"));
@@ -83,8 +86,19 @@ const handleRedo = () => {
 
       socket.emit("join-room", {
         roomId,
-        userId: socket.id,
-        role: localStorage.getItem("userRole") || "viewer", // default to viewer
+        userId,
+      });
+
+      socket.on("join-success", ({ role, whiteboardState }) => {
+        console.log("✅ Assigned role:", role);
+        setRole(role); // 💡 Save the user's role in state
+        setElements(whiteboardState); // your existing state update
+        // Use `role` to enable/disable tools
+        // Load whiteboard state
+      });
+
+      socket.on("join-error", (message) => {
+        alert("❌ Join failed: " + message);
       });
 
       console.log(`✅ Joined room: ${roomId}`);
