@@ -1,0 +1,48 @@
+.form-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(to bottom right, #d1c4e9, #b2ebf2);
+  font-family: 'Poppins', sans-serif;
+}
+
+.form-card {
+  background: #fff;
+  padding: 40px;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  width: 90%;
+  max-width: 500px;
+  text-align: center;
+}
+
+.form-card h2 {
+  margin-bottom: 20px;
+  font-size: 22px;
+}
+
+.form-input {
+  width: 100%;
+  padding: 10px 14px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.button-primary {
+  padding: 12px 20px;
+  background-color: #1976d2;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 15px;
+  margin-top: 15px;
+  transition: 0.2s;
+}
+
+.button-primary:hover {
+  background-color: #1565c0;
+}

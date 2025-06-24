@@ -2,6 +2,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
+import "./FormPage.css"; 
+
 const CreateRoom = () => {
   const [isPrivate, setIsPrivate] = useState(false);
   const [allowedUsers, setAllowedUsers] = useState("");
@@ -55,36 +57,40 @@ const CreateRoom = () => {
   };
 
   return (
-    <div style={{ padding: 20 }}>
-      <h2>Create a Room</h2>
-      <label>
-        <input
-          type="checkbox"
-          checked={isPrivate}
-          onChange={() => setIsPrivate(!isPrivate)}
-        />{" "}
-        Make Room Private
-      </label>
-      {isPrivate && (
-        <>
-          <br />
+    <div className="form-wrapper" >
+      <div className="form-card">
+        <h2 >Create a Room</h2>
+
+        <label style={{ display: "block", marginBottom: "10px" }} >
           <input
-            placeholder="Allowed Users (comma-separated)"
-            value={allowedUsers}
-            onChange={(e) => setAllowedUsers(e.target.value)}
-            style={{ width: "100%", margin: "5px 0" }}
-          />
-        </>
-      )}
-      <br />
-      <input
-        placeholder="Editor Users (comma-separated)"
-        value={editors}
-        onChange={(e) => setEditors(e.target.value)}
-        style={{ width: "100%", margin: "5px 0" }}
-      />
-      <br />
-      <button onClick={handleCreateRoom}>Create Room</button>
+            type="checkbox"
+            checked={isPrivate}
+            onChange={() => setIsPrivate(!isPrivate)}
+          />{" "}
+          Make Room Private
+        </label>
+
+        
+        {isPrivate && (
+            <input
+              placeholder="Allowed Users (comma-separated)"
+              value={allowedUsers}
+              onChange={(e) => setAllowedUsers(e.target.value)}
+              className="form-input"
+            />
+        )}
+
+        <input
+          placeholder="Editor Users (comma-separated)"
+          value={editors}
+          onChange={(e) => setEditors(e.target.value)}
+          className="form-input"
+        />
+
+        <button className="button-primary" onClick={handleCreateRoom}>
+          Create Room
+          </button>
+        </div>
     </div>
   );
 };

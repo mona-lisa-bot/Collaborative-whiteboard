@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import "./FormPage.css";
 
 const JoinRoom = () => {
   const [roomId, setRoomId] = useState("");
@@ -17,22 +18,26 @@ const JoinRoom = () => {
   };
 
   return (
-    <div style={{ padding: 20 }}>
-      <h2>Join a Room</h2>
-      <input
-        placeholder="Enter Room ID"
-        value={roomId}
-        onChange={(e) => setRoomId(e.target.value)}
-        style={{ width: "100%", margin: "5px 0" }}
-      />
-      <input
-        placeholder="Enter Your User ID"
-        value={userId}
-        onChange={(e) => setUserId(e.target.value)}
-        style={{ width: "100%", margin: "5px 0" }}
-      />
-      <br />
-      <button onClick={handleJoin}>Join Room</button>
+    <div className="form-wrapper">
+        <div className="form-card">
+            <h2 >Join a Room</h2>
+            <input
+                className="input-field"
+                placeholder="Enter Room ID"
+                value={roomId}
+                onChange={(e) => setRoomId(e.target.value)}
+            />
+            <input
+                className="input-field"
+                placeholder="Enter Your User ID"
+                value={userId}
+                onChange={(e) => setUserId(e.target.value)}
+            />
+
+            <button className="button-primary" onClick={handleJoin}>
+                Join Room
+            </button>
+        </div>
     </div>
   );
 };

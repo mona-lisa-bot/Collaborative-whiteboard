@@ -1,0 +1,45 @@
+/* src/HomePage.css */
+
+.homepage-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(to bottom right, #e0f7fa, #e1bee7);
+  font-family: 'Poppins', sans-serif;
+}
+
+.homepage-card {
+  background: white;
+  padding: 40px 50px;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.page-title {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 30px;
+}
+
+.button-group {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.button-primary {
+  padding: 12px 24px;
+  background-color: #4285f4;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.button-primary:hover {
+  background-color: #3367d6;
+}

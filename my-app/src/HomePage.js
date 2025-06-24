@@ -1,16 +1,21 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import "./HomePage.css";
 
 const HomePage = () => {
   return (
-    <div style={{ padding: 20 }}>
-      <h2>Welcome to the Whiteboard App</h2>
-      <Link to="/create">
-        <button style={{ marginRight: 10 }}>Create Room</button>
-      </Link>
-      <Link to="/join">
-        <button>Join Room</button>
-      </Link>
+    <div className="homepage-wrapper">
+        <div className="homepage-card">
+            <h2 className="page-title">Welcome to the Whiteboard App</h2>
+            <div className="button-group">
+            <Link to="/create">
+                <button className="button-primary">Create Room</button>
+            </Link>
+            <Link to="/join">
+                <button className="button-primary">Join Room</button>
+            </Link>
+            </div>
+        </div>
     </div>
   );
 };
