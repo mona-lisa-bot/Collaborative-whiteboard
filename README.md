@@ -38,9 +38,10 @@ A real-time collaborative whiteboard web application that allows multiple users 
 - **Bootstrapped With**: [Create React App](https://github.com/facebook/create-react-app)
 
 ---
-## Created using BoardStorm
+## BoardStorm Canvas Room Look
 
- <img width="818" alt="image" src="https://github.com/user-attachments/assets/7cd16664-2bdc-4925-9daa-2e8bfdc46aa8" />
+ <img width="950" alt="canvas_interface" src="https://github.com/user-attachments/assets/bf32fa9f-f0e8-4dca-a0c9-4206a2a8df60" />
+
  
 ---
 ## 🛠️ Getting Started (Development)
