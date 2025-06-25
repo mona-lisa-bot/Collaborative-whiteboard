@@ -135,6 +135,8 @@ const handleRedo = () => {
 
   const [action, setAction] = useState(null);
   const [selectedElement, setSelectedElement] = useState(null);
+  const [previewElement, setPreviewElement] = useState(null);
+
 
   
 
@@ -146,10 +148,16 @@ const handleRedo = () => {
     const ctx = canvas.getContext("2d");
     const roughCanvas = rough.canvas(canvas);
       ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+
       liveElements.forEach((element) => {
         drawElement({ roughCanvas, context: ctx, element });
       });
-    }, [liveElements]);
+
+      if (previewElement) {
+        drawElement({ roughCanvas, context: ctx, element: previewElement });
+     }
+    }, [liveElements, previewElement]);
 
     console.log("undo state",  store.getState().whiteboard.elements)
 
@@ -262,41 +270,28 @@ const handleRedo = () => {
   };
 
   const handleMouseUp = () => {
-    if (!isEditor) return;
-    const selectedElementIndex = liveElements.findIndex(
-      (el) => el.id === selectedElement?.id
-    );
+  if (!isEditor) return;
 
-    if (selectedElementIndex !== -1) {
-      if (action === actions.DRAWING || action === actions.RESIZING) {
-        if (adjustmentRequired(liveElements[selectedElementIndex].type)) {
-          const { x1, y1, x2, y2 } = adjustElementCoordinates(
-            liveElements[selectedElementIndex]
-          );
-
-          updateElement(
-            {
-              id: selectedElement.id,
-              index: selectedElementIndex,
-              x1,
-              x2,
-              y1,
-              y2,
-              type: liveElements[selectedElementIndex].type,
-            },
-            liveElements,
-            roomId,
-            setLiveElements
-          );
+  if (action === actions.DRAWING && previewElement) {
+    const finalizedElement = adjustmentRequired(previewElement.type)
+      ? {
+          ...previewElement,
+          ...adjustElementCoordinates(previewElement),
         }
-      }
-    }
+      : previewElement;
 
-    setAction(null);
-    setSelectedElement(null);
-    dispatch(setElements(liveElements));
+    // Save finalized element to liveElements
+    const updated = [...liveElements, finalizedElement];
+    setLiveElements(updated);
+    dispatch(setElements(updated));
+    emitElementUpdate(finalizedElement, roomId);
+  }
 
-  };
+  setAction(null);
+  setSelectedElement(null);
+  setPreviewElement(null); // ✅ Clear preview after committing
+};
+
 
   const handleMouseMove = (event) => {
     if (!isEditor) return;
@@ -331,22 +326,19 @@ const handleRedo = () => {
           return;
            }
 
+    if (
+      action === actions.DRAWING &&
+      selectedElement?.type !== toolTypes.PENCIL
+    ) {
+      setPreviewElement({
+        ...selectedElement,
+        x2: clientX,
+        y2: clientY,
+      });
+      return;
+    }
 
-      if (action === actions.DRAWING) {
-        const index = liveElements.findIndex((el) => el.id === selectedElement.id);
-
-        if (index !== -1) {
-          const updated = [...liveElements];
-          updated[index] = {
-            ...updated[index],
-            x2: clientX,
-            y2: clientY,
-          };
-          setLiveElements(updated);
-          emitElementUpdate(updated[index], roomId);
-        }
-        return;
-      }
+      
 
 
     if (toolType === toolTypes.SELECTION) {

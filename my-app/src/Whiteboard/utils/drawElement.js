@@ -3,6 +3,16 @@ import { getStroke } from "perfect-freehand";
 import { getSvgPathFromStroke } from ".";
 import rough from "roughjs/bundled/rough.esm";
 
+const hashString = (str) => {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = (hash << 5) - hash + str.charCodeAt(i);
+    hash |= 0; // Convert to 32bit integer
+  }
+  return Math.abs(hash);
+};
+
+
 const drawPencilElement = (context, element) => {
   if (!element.points || element.points.length < 2) return;
   
@@ -29,7 +39,9 @@ const drawTextElement = (context, element) => {
 const generator = rough.generator();
 
 const drawShapeElement = (roughCanvas, element) => {
-  const options = { stroke: element.color || "#000000" };
+  const options = { stroke: element.color || "#000000",
+     seed: hashString(element.id),
+   };
 
   switch (element.type) {
     case toolTypes.RECTANGLE:
